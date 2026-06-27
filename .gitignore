@@ -1,0 +1,39 @@
+# Dependencies
+node_modules
+.pnpm-store
+
+# Build outputs
+.next
+dist
+.turbo
+out
+
+# Environment variables — NEVER commit
+.env
+.env.local
+.env.*.local
+.env.production
+
+# Prisma — migration_lock.toml DOIT être commité (voir Prisma docs)
+prisma/*.db
+prisma/*.db-journal
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editors
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea
+
+# Testing
+coverage
+
+# Logs
+*.log
+npm-debug.log*
+
+# Vercel
+.vercel

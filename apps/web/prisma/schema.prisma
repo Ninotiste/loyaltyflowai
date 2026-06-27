@@ -1,0 +1,204 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ─── Organisation (Tenant) ────────────────────────────────────────────────────
+
+model Organization {
+  id         String   @id @default(uuid())
+  name       String
+  slug       String   @unique
+  logo_url   String?
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  team_members    TeamMember[]
+  loyalty_program LoyaltyProgram?
+  customers       Customer[]
+
+  @@map("organizations")
+}
+
+// ─── Membres de l'équipe ──────────────────────────────────────────────────────
+
+model TeamMember {
+  id              String   @id @default(uuid())
+  organization_id String
+  user_id         String   @unique
+  role            TeamRole @default(MEMBER)
+  email           String
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
+
+  organization Organization @relation(fields: [organization_id], references: [id], onDelete: Cascade)
+
+  @@index([organization_id])
+  @@map("team_members")
+}
+
+enum TeamRole {
+  ADMIN
+  MEMBER
+}
+
+// ─── Programme de fidélité ────────────────────────────────────────────────────
+
+model LoyaltyProgram {
+  id                        String        @id @default(uuid())
+  organization_id           String        @unique
+  name                      String
+  status                    ProgramStatus @default(INACTIVE)
+  public_key                String        @unique
+  inactivity_threshold_days Int           @default(30)
+  primary_color             String?       @default("#0284c7")
+  created_at                DateTime      @default(now())
+  updated_at                DateTime      @updatedAt
+
+  organization  Organization  @relation(fields: [organization_id], references: [id], onDelete: Cascade)
+  earning_rules EarningRule[]
+  rewards       Reward[]
+
+  @@map("loyalty_programs")
+}
+
+enum ProgramStatus {
+  ACTIVE
+  INACTIVE
+}
+
+// ─── Règles de gain ───────────────────────────────────────────────────────────
+
+model EarningRule {
+  id                 String          @id @default(uuid())
+  loyalty_program_id String
+  type               EarningRuleType
+  points_per_unit    Int
+  unit_description   String?
+  is_active          Boolean         @default(true)
+  created_at         DateTime        @default(now())
+  updated_at         DateTime        @updatedAt
+
+  loyalty_program LoyaltyProgram @relation(fields: [loyalty_program_id], references: [id], onDelete: Cascade)
+
+  @@index([loyalty_program_id])
+  @@map("earning_rules")
+}
+
+enum EarningRuleType {
+  PER_VISIT
+  PER_AMOUNT_SPENT
+}
+
+// ─── Récompenses ─────────────────────────────────────────────────────────────
+
+model Reward {
+  id                 String   @id @default(uuid())
+  loyalty_program_id String
+  name               String
+  description        String?
+  points_required    Int
+  is_active          Boolean  @default(true)
+  created_at         DateTime @default(now())
+  updated_at         DateTime @updatedAt
+
+  loyalty_program LoyaltyProgram @relation(fields: [loyalty_program_id], references: [id], onDelete: Cascade)
+
+  @@index([loyalty_program_id])
+  @@map("rewards")
+}
+
+// ─── Clients ─────────────────────────────────────────────────────────────────
+
+model Customer {
+  id              String    @id @default(uuid())
+  organization_id String
+  email           String
+  first_name      String?
+  last_name       String?
+  phone           String?
+  total_points    Int       @default(0)
+  last_visit_at   DateTime?
+  deleted_at      DateTime?
+  created_at      DateTime  @default(now())
+  updated_at      DateTime  @updatedAt
+
+  organization       Organization       @relation(fields: [organization_id], references: [id], onDelete: Cascade)
+  point_transactions PointTransaction[]
+  churn_scores       ChurnScore[]
+
+  @@unique([organization_id, email])
+  @@index([organization_id])
+  @@index([organization_id, last_visit_at])
+  @@index([organization_id, deleted_at])
+  @@map("customers")
+}
+
+// ─── Transactions de points ───────────────────────────────────────────────────
+
+model PointTransaction {
+  id          String               @id @default(uuid())
+  customer_id String
+  amount      Int
+  type        PointTransactionType
+  reason      String?
+  created_at  DateTime             @default(now())
+
+  customer Customer @relation(fields: [customer_id], references: [id], onDelete: Cascade)
+
+  @@index([customer_id])
+  @@index([customer_id, created_at])
+  @@map("point_transactions")
+}
+
+enum PointTransactionType {
+  EARN_VISIT
+  EARN_AMOUNT
+  EARN_MANUAL
+  REDEEM_REWARD
+  ADJUST_MANUAL
+}
+
+// ─── Scores de churn ─────────────────────────────────────────────────────────
+
+model ChurnScore {
+  id                    String     @id @default(uuid())
+  customer_id           String
+  score                 ChurnLevel
+  calculated_at         DateTime   @default(now())
+  days_since_last_visit Int
+  scored_date           String     // "YYYY-MM-DD" — one score per customer per day
+
+  customer Customer @relation(fields: [customer_id], references: [id], onDelete: Cascade)
+
+  @@unique([customer_id, scored_date])
+  @@index([customer_id])
+  @@map("churn_scores")
+}
+
+enum ChurnLevel {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+// ─── Log d'audit IA ──────────────────────────────────────────────────────────
+
+model AiAuditLog {
+  id            String   @id @default(uuid())
+  entity_type   String
+  entity_id     String
+  model_used    String
+  model_version String?
+  input_summary String?
+  output        String
+  created_at    DateTime @default(now())
+
+  @@index([entity_type, entity_id])
+  @@map("ai_audit_log")
+}

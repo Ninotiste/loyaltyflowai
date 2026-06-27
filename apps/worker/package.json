@@ -1,0 +1,30 @@
+{
+  "name": "@loyaltyflowai/worker",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "type-check": "tsc --noEmit",
+    "lint": "eslint src --ext .ts"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.22.0",
+    "@upstash/redis": "^1.34.3",
+    "@anthropic-ai/sdk": "^0.32.1",
+    "@loyaltyflowai/config": "workspace:*",
+    "@loyaltyflowai/logger": "workspace:*",
+    "@loyaltyflowai/types": "workspace:*",
+    "@loyaltyflowai/utils": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.9.0",
+    "@typescript-eslint/eslint-plugin": "^8.0.0",
+    "@typescript-eslint/parser": "^8.0.0",
+    "eslint": "^8.57.1",
+    "prisma": "^5.22.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3"
+  }
+}
