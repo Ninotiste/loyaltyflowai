@@ -1,8 +1,14 @@
 {
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "installCommand": "cd ../.. && pnpm install --frozen-lockfile",
+  "buildCommand": "cd ../.. && pnpm turbo run build --filter=@loyaltyflowai/web",
+  "outputDirectory": ".next",
+  "framework": "nextjs",
+  "regions": ["cdg1"],
   "crons": [
     {
       "path": "/api/v1/cron/calculate-churn",
-      "schedule": "0 1 * * *"
+      "schedule": "0 3 * * *"
     }
   ]
 }
