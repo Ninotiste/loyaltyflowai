@@ -1,6 +1,12 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { Plus, Trash2, Copy, CheckCheck, Gift, Zap, Settings2 } from 'lucide-react'
+import { PageHeader } from '@/components/layout/page-header'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Badge } from '@/components/ui/badge'
+import { Spinner } from '@/components/ui/spinner'
 
 interface EarningRule {
   id: string
@@ -35,22 +41,20 @@ export default function ProgramPage() {
   const [program, setProgram] = useState<Program | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [keyCopied, setKeyCopied] = useState(false)
 
-  // New earning rule form
   const [ruleType, setRuleType] = useState<'PER_VISIT' | 'PER_AMOUNT_SPENT'>('PER_VISIT')
   const [rulePoints, setRulePoints] = useState('1')
   const [ruleMin, setRuleMin] = useState('')
 
-  // New reward form
   const [rewardName, setRewardName] = useState('')
   const [rewardDesc, setRewardDesc] = useState('')
   const [rewardPoints, setRewardPoints] = useState('100')
 
-  // Program settings
   const [programName, setProgramName] = useState('')
   const [welcomeMsg, setWelcomeMsg] = useState('')
   const [buttonText, setButtonText] = useState('')
-  const [color, setColor] = useState('#0284c7')
+  const [color, setColor] = useState('#7c3aed')
 
   useEffect(() => {
     fetch('/api/v1/programs/current')
@@ -62,7 +66,7 @@ export default function ProgramPage() {
           setProgramName(p.name)
           setWelcomeMsg(p.welcome_message ?? '')
           setButtonText(p.button_text ?? 'Mes points 🎁')
-          setColor(p.primary_color ?? '#0284c7')
+          setColor(p.primary_color ?? '#7c3aed')
         }
       })
       .finally(() => setLoading(false))
@@ -165,131 +169,141 @@ export default function ProgramPage() {
     )
   }
 
+  function copyKey() {
+    if (!program) return
+    navigator.clipboard.writeText(program.public_key)
+    setKeyCopied(true)
+    setTimeout(() => setKeyCopied(false), 2000)
+  }
+
   if (loading) {
     return (
       <div className="flex h-64 items-center justify-center">
-        <div className="border-brand-600 h-8 w-8 animate-spin rounded-full border-2 border-t-transparent" />
+        <Spinner size="lg" />
       </div>
     )
   }
 
   return (
-    <div className="mx-auto max-w-3xl space-y-8">
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">Programme de fidélité</h1>
-        <p className="mt-1 text-sm text-gray-500">Configurez vos règles et récompenses.</p>
-      </div>
+    <div className="max-w-3xl space-y-6">
+      <PageHeader
+        title="Programme de fidélité"
+        description="Configurez vos règles de gain et vos récompenses."
+      />
 
       {!program ? (
-        <div className="rounded-xl bg-white p-8 text-center shadow-sm ring-1 ring-gray-200">
-          <h2 className="mb-2 text-lg font-semibold text-gray-900">Aucun programme créé</h2>
-          <p className="mb-4 text-sm text-gray-500">
-            Créez votre programme pour commencer à fidéliser vos clients.
+        <div className="panel flex flex-col items-center p-10 text-center">
+          <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-violet-50">
+            <Gift className="h-8 w-8 text-violet-600" />
+          </div>
+          <h2 className="font-display mb-2 text-xl font-bold text-zinc-900">
+            Créer votre programme
+          </h2>
+          <p className="mb-6 max-w-sm text-sm text-zinc-500">
+            Donnez un nom à votre programme et commencez à fidéliser vos clients en quelques
+            minutes.
           </p>
-          <div className="flex justify-center gap-3">
-            <input
+          <div className="flex gap-3">
+            <Input
               type="text"
               value={programName}
               onChange={(e) => setProgramName(e.target.value)}
-              placeholder="Nom du programme (ex: Club Fidèle)"
-              className="focus:ring-brand-500 w-64 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2"
+              placeholder="Club Fidèle du Bistrot"
+              className="w-64"
             />
-            <button
-              onClick={createProgram}
-              disabled={saving}
-              className="bg-brand-600 hover:bg-brand-700 rounded-lg px-4 py-2 text-sm font-medium text-white disabled:opacity-60"
-            >
-              {saving ? 'Création...' : 'Créer le programme'}
-            </button>
+            <Button onClick={createProgram} loading={saving}>
+              Créer le programme
+            </Button>
           </div>
         </div>
       ) : (
         <>
-          {/* Programme settings */}
-          <section className="space-y-4 rounded-xl bg-white p-6 shadow-sm ring-1 ring-gray-200">
+          {/* Settings section */}
+          <section className="panel space-y-5 p-6">
             <div className="flex items-center justify-between">
-              <h2 className="font-semibold text-gray-900">Paramètres</h2>
-              <span
-                className={`rounded-full px-2 py-0.5 text-xs font-medium ${program.status === 'ACTIVE' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}
-              >
-                {program.status === 'ACTIVE' ? 'Actif' : 'Inactif'}
-              </span>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700">
-                  Nom du programme
-                </label>
-                <input
-                  type="text"
-                  value={programName}
-                  onChange={(e) => setProgramName(e.target.value)}
-                  className="focus:ring-brand-500 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2"
-                />
+              <div className="flex items-center gap-2">
+                <Settings2 className="h-4 w-4 text-zinc-400" />
+                <h2 className="font-display text-base font-bold text-zinc-900">Paramètres</h2>
               </div>
-              <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700">
-                  Couleur principale
-                </label>
+              <Badge variant={program.status === 'ACTIVE' ? 'success' : 'secondary'} dot size="md">
+                {program.status === 'ACTIVE' ? 'Actif' : 'Inactif'}
+              </Badge>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <Input
+                label="Nom du programme"
+                type="text"
+                value={programName}
+                onChange={(e) => setProgramName(e.target.value)}
+              />
+              <div className="flex flex-col gap-1.5">
+                <label className="text-sm font-medium text-zinc-700">Couleur principale</label>
                 <div className="flex gap-2">
                   <input
                     type="color"
                     value={color}
                     onChange={(e) => setColor(e.target.value)}
-                    className="h-10 w-10 cursor-pointer rounded-lg border border-gray-300"
+                    className="h-10 w-12 cursor-pointer rounded-xl border border-zinc-200 p-1"
                   />
                   <input
                     type="text"
                     value={color}
                     onChange={(e) => setColor(e.target.value)}
-                    className="focus:ring-brand-500 flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2"
+                    className="h-10 flex-1 rounded-xl border border-zinc-200 bg-white px-3 text-sm text-zinc-900 outline-none focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20"
                   />
                 </div>
               </div>
-              <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700">
-                  Texte du bouton widget
-                </label>
-                <input
-                  type="text"
-                  value={buttonText}
-                  onChange={(e) => setButtonText(e.target.value)}
-                  className="focus:ring-brand-500 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2"
-                />
-              </div>
-              <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700">
-                  Message d&apos;accueil
-                </label>
-                <input
-                  type="text"
-                  value={welcomeMsg}
-                  onChange={(e) => setWelcomeMsg(e.target.value)}
-                  placeholder="Bienvenue dans notre programme !"
-                  className="focus:ring-brand-500 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2"
-                />
-              </div>
+              <Input
+                label="Texte du bouton widget"
+                type="text"
+                value={buttonText}
+                onChange={(e) => setButtonText(e.target.value)}
+              />
+              <Input
+                label="Message d'accueil"
+                type="text"
+                value={welcomeMsg}
+                onChange={(e) => setWelcomeMsg(e.target.value)}
+                placeholder="Bienvenue dans notre programme !"
+              />
             </div>
-            <div className="flex items-center justify-between">
-              <p className="text-xs text-gray-400">
-                Clé publique :{' '}
-                <code className="rounded bg-gray-100 px-1">{program.public_key}</code>
-              </p>
-              <button
-                onClick={updateProgram}
-                disabled={saving}
-                className="bg-brand-600 hover:bg-brand-700 rounded-lg px-4 py-2 text-sm font-medium text-white disabled:opacity-60"
-              >
-                {saving ? 'Enregistrement...' : 'Enregistrer'}
-              </button>
+
+            <div className="flex items-center justify-between border-t border-zinc-100 pt-1">
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-zinc-400">Clé publique :</span>
+                <code className="rounded-lg bg-zinc-100 px-2 py-1 font-mono text-xs text-zinc-600">
+                  {program.public_key}
+                </code>
+                <button
+                  onClick={copyKey}
+                  className="text-zinc-400 transition-colors hover:text-violet-600"
+                  title="Copier"
+                >
+                  {keyCopied ? (
+                    <CheckCheck className="h-4 w-4 text-green-500" />
+                  ) : (
+                    <Copy className="h-4 w-4" />
+                  )}
+                </button>
+              </div>
+              <Button onClick={updateProgram} loading={saving} size="sm">
+                Enregistrer
+              </Button>
             </div>
           </section>
 
           {/* Earning rules */}
-          <section className="space-y-4 rounded-xl bg-white p-6 shadow-sm ring-1 ring-gray-200">
-            <h2 className="font-semibold text-gray-900">Règles de gain</h2>
+          <section className="panel space-y-4 p-6">
+            <div className="flex items-center gap-2">
+              <Zap className="h-4 w-4 text-amber-500" />
+              <h2 className="font-display text-base font-bold text-zinc-900">Règles de gain</h2>
+            </div>
+
             {program.earning_rules.filter((r) => r.is_active).length === 0 ? (
-              <p className="text-sm text-gray-500">Aucune règle. Ajoutez-en une ci-dessous.</p>
+              <p className="text-sm italic text-zinc-400">
+                Aucune règle. Ajoutez-en une ci-dessous.
+              </p>
             ) : (
               <ul className="space-y-2">
                 {program.earning_rules
@@ -297,28 +311,32 @@ export default function ProgramPage() {
                   .map((rule) => (
                     <li
                       key={rule.id}
-                      className="flex items-center justify-between rounded-lg bg-gray-50 px-4 py-3"
+                      className="flex items-center justify-between rounded-xl border border-zinc-100 bg-zinc-50 px-4 py-3"
                     >
-                      <span className="text-sm text-gray-700">
-                        {rule.type === 'PER_VISIT'
-                          ? `${rule.points_per_unit} point${rule.points_per_unit > 1 ? 's' : ''} par visite`
-                          : `${rule.points_per_unit} point${rule.points_per_unit > 1 ? 's' : ''} par € dépensé${rule.minimum_amount ? ` (min. ${rule.minimum_amount}€)` : ''}`}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <Zap className="h-3.5 w-3.5 text-amber-500" />
+                        <span className="text-sm text-zinc-700">
+                          {rule.type === 'PER_VISIT'
+                            ? `${rule.points_per_unit} point${rule.points_per_unit > 1 ? 's' : ''} par visite`
+                            : `${rule.points_per_unit} point${rule.points_per_unit > 1 ? 's' : ''} par € dépensé${rule.minimum_amount ? ` (min. ${rule.minimum_amount}€)` : ''}`}
+                        </span>
+                      </div>
                       <button
                         onClick={() => deleteRule(rule.id)}
-                        className="text-sm text-red-500 hover:text-red-700"
+                        className="flex h-7 w-7 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-red-50 hover:text-red-500"
                       >
-                        Supprimer
+                        <Trash2 className="h-3.5 w-3.5" />
                       </button>
                     </li>
                   ))}
               </ul>
             )}
-            <form onSubmit={addRule} className="flex gap-3 border-t border-gray-100 pt-2">
+
+            <form onSubmit={addRule} className="flex gap-3 border-t border-zinc-100 pt-2">
               <select
                 value={ruleType}
                 onChange={(e) => setRuleType(e.target.value as typeof ruleType)}
-                className="focus:ring-brand-500 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2"
+                className="h-10 rounded-xl border border-zinc-200 bg-white px-3 text-sm text-zinc-700 outline-none focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20"
               >
                 <option value="PER_VISIT">Par visite</option>
                 <option value="PER_AMOUNT_SPENT">Par montant dépensé</option>
@@ -331,7 +349,7 @@ export default function ProgramPage() {
                 onChange={(e) => setRulePoints(e.target.value)}
                 placeholder="Points"
                 required
-                className="focus:ring-brand-500 w-24 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2"
+                className="h-10 w-24 rounded-xl border border-zinc-200 bg-white px-3 text-sm text-zinc-900 outline-none focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20"
               />
               {ruleType === 'PER_AMOUNT_SPENT' && (
                 <input
@@ -340,23 +358,27 @@ export default function ProgramPage() {
                   value={ruleMin}
                   onChange={(e) => setRuleMin(e.target.value)}
                   placeholder="Min. (€)"
-                  className="focus:ring-brand-500 w-28 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2"
+                  className="h-10 w-28 rounded-xl border border-zinc-200 bg-white px-3 text-sm text-zinc-900 outline-none focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20"
                 />
               )}
-              <button
-                type="submit"
-                className="rounded-lg bg-gray-800 px-4 py-2 text-sm font-medium text-white hover:bg-gray-900"
-              >
+              <Button type="submit" variant="secondary" size="md" className="gap-1.5">
+                <Plus className="h-4 w-4" />
                 Ajouter
-              </button>
+              </Button>
             </form>
           </section>
 
           {/* Rewards */}
-          <section className="space-y-4 rounded-xl bg-white p-6 shadow-sm ring-1 ring-gray-200">
-            <h2 className="font-semibold text-gray-900">Récompenses</h2>
+          <section className="panel space-y-4 p-6">
+            <div className="flex items-center gap-2">
+              <Gift className="h-4 w-4 text-violet-600" />
+              <h2 className="font-display text-base font-bold text-zinc-900">Récompenses</h2>
+            </div>
+
             {program.rewards.filter((r) => r.is_active).length === 0 ? (
-              <p className="text-sm text-gray-500">Aucune récompense. Ajoutez-en une ci-dessous.</p>
+              <p className="text-sm italic text-zinc-400">
+                Aucune récompense. Ajoutez-en une ci-dessous.
+              </p>
             ) : (
               <ul className="space-y-2">
                 {program.rewards
@@ -364,44 +386,45 @@ export default function ProgramPage() {
                   .map((reward) => (
                     <li
                       key={reward.id}
-                      className="flex items-center justify-between rounded-lg bg-gray-50 px-4 py-3"
+                      className="flex items-center justify-between rounded-xl border border-zinc-100 bg-zinc-50 px-4 py-3"
                     >
                       <div>
-                        <p className="text-sm font-medium text-gray-900">{reward.name}</p>
+                        <p className="text-sm font-semibold text-zinc-900">{reward.name}</p>
                         {reward.description && (
-                          <p className="text-xs text-gray-500">{reward.description}</p>
+                          <p className="text-xs text-zinc-500">{reward.description}</p>
                         )}
                       </div>
-                      <div className="flex items-center gap-4">
-                        <span className="text-brand-600 text-sm font-semibold">
+                      <div className="flex items-center gap-3">
+                        <Badge variant="primary" size="md">
                           {reward.points_required} pts
-                        </span>
+                        </Badge>
                         <button
                           onClick={() => deleteReward(reward.id)}
-                          className="text-sm text-red-500 hover:text-red-700"
+                          className="flex h-7 w-7 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-red-50 hover:text-red-500"
                         >
-                          Supprimer
+                          <Trash2 className="h-3.5 w-3.5" />
                         </button>
                       </div>
                     </li>
                   ))}
               </ul>
             )}
-            <form onSubmit={addReward} className="flex gap-3 border-t border-gray-100 pt-2">
+
+            <form onSubmit={addReward} className="flex gap-3 border-t border-zinc-100 pt-2">
               <input
                 type="text"
                 value={rewardName}
                 onChange={(e) => setRewardName(e.target.value)}
-                placeholder="Nom (ex: Café offert)"
+                placeholder="Café offert"
                 required
-                className="focus:ring-brand-500 flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2"
+                className="h-10 flex-1 rounded-xl border border-zinc-200 bg-white px-3 text-sm text-zinc-900 outline-none placeholder:text-zinc-400 focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20"
               />
               <input
                 type="text"
                 value={rewardDesc}
                 onChange={(e) => setRewardDesc(e.target.value)}
                 placeholder="Description (optionnel)"
-                className="focus:ring-brand-500 flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2"
+                className="h-10 flex-1 rounded-xl border border-zinc-200 bg-white px-3 text-sm text-zinc-900 outline-none placeholder:text-zinc-400 focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20"
               />
               <input
                 type="number"
@@ -410,14 +433,12 @@ export default function ProgramPage() {
                 onChange={(e) => setRewardPoints(e.target.value)}
                 placeholder="Points"
                 required
-                className="focus:ring-brand-500 w-24 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2"
+                className="h-10 w-24 rounded-xl border border-zinc-200 bg-white px-3 text-sm text-zinc-900 outline-none focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20"
               />
-              <button
-                type="submit"
-                className="rounded-lg bg-gray-800 px-4 py-2 text-sm font-medium text-white hover:bg-gray-900"
-              >
+              <Button type="submit" variant="secondary" size="md" className="gap-1.5">
+                <Plus className="h-4 w-4" />
                 Ajouter
-              </button>
+              </Button>
             </form>
           </section>
         </>

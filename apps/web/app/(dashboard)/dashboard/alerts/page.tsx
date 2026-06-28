@@ -3,6 +3,12 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import type { Route } from 'next'
+import { Sparkles, Send, CheckCircle, ChevronRight } from 'lucide-react'
+import { PageHeader } from '@/components/layout/page-header'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { Spinner } from '@/components/ui/spinner'
+import { Avatar } from '@/components/ui/avatar'
 
 interface ChurnCustomer {
   id: string
@@ -21,10 +27,6 @@ interface AiSuggestion {
   send_at: string
   reason: string
   estimated_roi: string
-}
-
-interface SuggestionsResponse {
-  suggestion: AiSuggestion | null
 }
 
 function formatRelativeDate(iso: string | null) {
@@ -59,7 +61,7 @@ export default function AlertsPage() {
         body: JSON.stringify({ high_churn_count: customers.length }),
       })
       if (res.ok) {
-        const d: SuggestionsResponse = await res.json()
+        const d = await res.json()
         setSuggestion(d.suggestion)
       }
     } finally {
@@ -85,127 +87,175 @@ export default function AlertsPage() {
   if (loading) {
     return (
       <div className="flex h-64 items-center justify-center">
-        <div className="border-brand-600 h-8 w-8 animate-spin rounded-full border-2 border-t-transparent" />
+        <Spinner size="lg" />
       </div>
     )
   }
 
   return (
-    <div className="mx-auto max-w-4xl space-y-8">
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">Alertes Churn</h1>
-        <p className="mt-1 text-sm text-gray-500">
-          Clients inactifs depuis plus de 60 jours — à risque de vous quitter définitivement.
-        </p>
-      </div>
+    <div>
+      <PageHeader
+        title="Alertes Churn"
+        description="Clients inactifs depuis plus de 60 jours — à risque de vous quitter définitivement."
+      />
 
       {customers.length === 0 ? (
-        <div className="rounded-xl bg-green-50 p-8 text-center ring-1 ring-green-200">
-          <p className="text-2xl font-bold text-green-700">Excellente rétention !</p>
-          <p className="mt-2 text-sm text-green-600">
-            Aucun client inactif détecté. Continuez comme ça.
+        <div className="panel flex flex-col items-center p-12 text-center">
+          <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-green-50">
+            <CheckCircle className="h-8 w-8 text-green-500" />
+          </div>
+          <h2 className="font-display mb-2 text-xl font-bold text-zinc-900">
+            Excellente rétention !
+          </h2>
+          <p className="text-sm text-zinc-500">
+            Aucun client inactif détecté. Votre programme de fidélité fonctionne parfaitement.
           </p>
         </div>
       ) : (
-        <>
-          {/* AI Suggestion Box */}
-          <div className="rounded-xl bg-indigo-50 p-6 ring-1 ring-indigo-200">
-            <div className="flex items-start justify-between">
-              <div>
-                <h2 className="font-semibold text-indigo-900">Loyalty Brain — Suggestion IA</h2>
-                <p className="mt-1 text-sm text-indigo-700">
-                  {customers.length} client{customers.length > 1 ? 's' : ''} à risque détecté
-                  {customers.length > 1 ? 's' : ''}
-                </p>
+        <div className="space-y-6">
+          {/* Loyalty Brain AI Panel */}
+          <div className="rounded-2xl border border-violet-200 bg-gradient-to-br from-violet-50 to-violet-50/30 p-6">
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex items-start gap-3">
+                <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-violet-100">
+                  <Sparkles className="h-5 w-5 text-violet-600" />
+                </div>
+                <div>
+                  <div className="mb-0.5 flex items-center gap-2">
+                    <h2 className="font-display text-base font-bold text-violet-900">
+                      Loyalty Brain
+                    </h2>
+                    <Badge variant="primary" size="sm">
+                      IA
+                    </Badge>
+                  </div>
+                  <p className="text-sm text-violet-700">
+                    {customers.length} client{customers.length > 1 ? 's' : ''} à risque détecté
+                    {customers.length > 1 ? 's' : ''}. Générez une campagne personnalisée.
+                  </p>
+                </div>
               </div>
-              <button
+              <Button
+                variant="primary"
+                size="sm"
                 onClick={fetchSuggestion}
-                disabled={suggestLoading}
-                className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-60"
+                loading={suggestLoading}
               >
-                {suggestLoading ? 'Génération...' : 'Suggérer une campagne'}
-              </button>
+                {!suggestLoading && <Sparkles className="h-3.5 w-3.5" />}
+                {suggestLoading ? 'Génération…' : 'Suggérer une campagne'}
+              </Button>
             </div>
 
             {suggestion && (
-              <div className="mt-4 space-y-3 border-t border-indigo-200 pt-4">
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-wide text-indigo-500">
+              <div className="mt-5 space-y-4 border-t border-violet-200 pt-5">
+                <div className="grid gap-1">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-violet-400">
                     Campagne suggérée
                   </p>
-                  <p className="text-sm font-medium text-indigo-900">{suggestion.title}</p>
-                  <p className="mt-0.5 text-xs text-indigo-600">À envoyer : {suggestion.send_at}</p>
+                  <p className="font-semibold text-violet-900">{suggestion.title}</p>
+                  <p className="text-xs text-violet-600">À envoyer : {suggestion.send_at}</p>
                 </div>
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-wide text-indigo-500">
+                <div className="rounded-xl border border-violet-100 bg-white/60 p-4">
+                  <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-violet-400">
                     Message
                   </p>
-                  <p className="whitespace-pre-line text-sm text-indigo-800">
+                  <p className="whitespace-pre-line text-sm leading-relaxed text-violet-800">
                     {suggestion.message}
                   </p>
                 </div>
                 <div className="flex items-center justify-between">
-                  <p className="text-xs text-indigo-600">
-                    Impact estimé : {suggestion.estimated_roi}
-                  </p>
-                  <button
+                  <div>
+                    <p className="text-xs text-violet-500">Raison : {suggestion.reason}</p>
+                    <p className="mt-0.5 text-xs font-semibold text-violet-700">
+                      Impact estimé : {suggestion.estimated_roi}
+                    </p>
+                  </div>
+                  <Button
+                    variant="primary"
+                    size="sm"
                     onClick={sendReactivationCampaign}
-                    disabled={sendingAll}
-                    className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-60"
+                    loading={sendingAll}
+                    className="gap-2"
                   >
-                    {sendingAll ? 'Envoi...' : 'Envoyer à tous'}
-                  </button>
+                    {!sendingAll && <Send className="h-3.5 w-3.5" />}
+                    {sendingAll ? 'Envoi en cours…' : 'Envoyer à tous'}
+                  </Button>
                 </div>
                 {sentCount > 0 && (
-                  <p className="text-sm font-medium text-green-600">
+                  <div className="flex items-center gap-2 rounded-xl bg-green-50 px-4 py-3 text-sm font-medium text-green-600">
+                    <CheckCircle className="h-4 w-4" />
                     {sentCount} email{sentCount > 1 ? 's' : ''} envoyé{sentCount > 1 ? 's' : ''}{' '}
                     avec succès !
-                  </p>
+                  </div>
                 )}
               </div>
             )}
           </div>
 
-          {/* Churn customer list */}
-          <div className="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-gray-200">
-            <table className="w-full text-sm">
-              <thead className="border-b border-gray-200 bg-gray-50">
+          {/* Churn table */}
+          <div className="panel overflow-hidden">
+            <div className="flex items-center justify-between border-b border-zinc-100 px-5 py-4">
+              <h3 className="font-display text-sm font-semibold text-zinc-900">Clients inactifs</h3>
+              <Badge variant="churn-high" dot>
+                {customers.length} client{customers.length > 1 ? 's' : ''}
+              </Badge>
+            </div>
+            <table className="w-full text-left text-sm">
+              <thead className="border-b border-zinc-100 bg-zinc-50/50">
                 <tr>
-                  <th className="px-4 py-3 text-left font-medium text-gray-600">Client</th>
-                  <th className="px-4 py-3 text-left font-medium text-gray-600">Points</th>
-                  <th className="px-4 py-3 text-left font-medium text-gray-600">Dernière visite</th>
-                  <th className="px-4 py-3 text-left font-medium text-gray-600">Inactivité</th>
-                  <th className="px-4 py-3" />
+                  <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-zinc-500">
+                    Client
+                  </th>
+                  <th className="hidden px-5 py-3 text-xs font-semibold uppercase tracking-wider text-zinc-500 sm:table-cell">
+                    Points
+                  </th>
+                  <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-zinc-500">
+                    Dernière visite
+                  </th>
+                  <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-zinc-500">
+                    Inactivité
+                  </th>
+                  <th className="px-5 py-3" />
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100">
+              <tbody className="divide-y divide-zinc-100">
                 {customers.map((c) => {
-                  const name = [c.first_name, c.last_name].filter(Boolean).join(' ') || c.email
+                  const name =
+                    [c.first_name, c.last_name].filter(Boolean).join(' ') || c.email.split('@')[0]
                   return (
-                    <tr key={c.id} className="hover:bg-gray-50">
-                      <td className="px-4 py-3">
-                        <p className="font-medium text-gray-900">{name}</p>
-                        <p className="text-xs text-gray-500">{c.email}</p>
+                    <tr key={c.id} className="group transition-colors hover:bg-zinc-50/70">
+                      <td className="px-5 py-3.5">
+                        <div className="flex items-center gap-3">
+                          <Avatar fallback={name} size="sm" />
+                          <div>
+                            <p className="font-medium text-zinc-900">{name}</p>
+                            <p className="text-xs text-zinc-400">{c.email}</p>
+                          </div>
+                        </div>
                       </td>
-                      <td className="px-4 py-3 font-semibold text-gray-900">
-                        {c.total_points} pts
+                      <td className="hidden px-5 py-3.5 sm:table-cell">
+                        <span className="tabular font-semibold text-zinc-900">
+                          {c.total_points}
+                        </span>
+                        <span className="ml-1 text-xs text-zinc-400">pts</span>
                       </td>
-                      <td className="px-4 py-3 text-gray-500">
+                      <td className="px-5 py-3.5 text-sm text-zinc-500">
                         {formatRelativeDate(c.last_visit_at)}
                       </td>
-                      <td className="px-4 py-3">
+                      <td className="px-5 py-3.5">
                         {c.churn_days && (
-                          <span className="rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-700">
-                            {c.churn_days} jours
-                          </span>
+                          <Badge variant="churn-high" size="sm">
+                            {c.churn_days}j
+                          </Badge>
                         )}
                       </td>
-                      <td className="px-4 py-3 text-right">
+                      <td className="px-5 py-3.5 text-right">
                         <Link
                           href={`/dashboard/customers/${c.id}` as Route}
-                          className="text-brand-600 hover:underline"
+                          className="inline-flex items-center gap-1 text-xs font-semibold text-violet-600 opacity-0 transition-all hover:text-violet-700 group-hover:opacity-100"
                         >
                           Profil
+                          <ChevronRight className="h-3.5 w-3.5" />
                         </Link>
                       </td>
                     </tr>
@@ -214,7 +264,7 @@ export default function AlertsPage() {
               </tbody>
             </table>
           </div>
-        </>
+        </div>
       )}
     </div>
   )

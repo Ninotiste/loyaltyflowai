@@ -3,6 +3,12 @@
 import { useState, useEffect, useCallback } from 'react'
 import type { Route } from 'next'
 import Link from 'next/link'
+import { Search, Users, ChevronRight } from 'lucide-react'
+import { PageHeader } from '@/components/layout/page-header'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Spinner } from '@/components/ui/spinner'
+import { Avatar } from '@/components/ui/avatar'
 
 interface Customer {
   id: string
@@ -21,19 +27,19 @@ interface CustomersResponse {
   meta: { total: number; limit: number; next_cursor: string | null }
 }
 
-const CHURN_BADGE = {
-  LOW: { label: 'Actif', className: 'bg-green-100 text-green-700' },
-  MEDIUM: { label: 'À risque', className: 'bg-amber-100 text-amber-700' },
-  HIGH: { label: 'Inactif', className: 'bg-red-100 text-red-700' },
+const CHURN_VARIANT = {
+  LOW: { variant: 'churn-low' as const, label: 'Actif' },
+  MEDIUM: { variant: 'churn-medium' as const, label: 'À risque' },
+  HIGH: { variant: 'churn-high' as const, label: 'Inactif' },
 }
 
 function formatDate(iso: string | null) {
   if (!iso) return '—'
-  return new Date(iso).toLocaleDateString('fr-FR', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-  })
+  const days = Math.floor((Date.now() - new Date(iso).getTime()) / (1000 * 60 * 60 * 24))
+  if (days === 0) return "aujourd'hui"
+  if (days === 1) return 'hier'
+  if (days < 7) return `il y a ${days}j`
+  return new Date(iso).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })
 }
 
 export default function CustomersPage() {
@@ -47,13 +53,13 @@ export default function CustomersPage() {
   const [loading, setLoading] = useState(true)
 
   const fetchCustomers = useCallback(
-    async (newCursor?: string | null, append = false) => {
+    async (cursor?: string | null, append = false) => {
       setLoading(true)
       try {
         const params = new URLSearchParams({ limit: '50' })
         if (search) params.set('search', search)
         if (churnFilter) params.set('churn', churnFilter)
-        if (newCursor) params.set('cursor', newCursor)
+        if (cursor) params.set('cursor', cursor)
 
         const res = await fetch(`/api/v1/customers?${params}`)
         if (!res.ok) return
@@ -71,96 +77,111 @@ export default function CustomersPage() {
     fetchCustomers(null)
   }, [search, churnFilter]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  function loadMore() {
-    if (meta.next_cursor) {
-      fetchCustomers(meta.next_cursor, true)
-    }
-  }
-
   return (
     <div>
-      <div className="mb-6 flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Clients</h1>
-          <p className="mt-1 text-sm text-gray-500">
-            {meta.total} client{meta.total > 1 ? 's' : ''} au total
-          </p>
-        </div>
-      </div>
+      <PageHeader
+        title="Clients"
+        description={`${meta.total} client${meta.total > 1 ? 's' : ''} au total`}
+      />
 
-      <div className="mb-4 flex gap-3">
-        <input
-          type="search"
-          placeholder="Rechercher par email, prénom, nom..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="focus:ring-brand-500 flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2"
-        />
+      {/* Filters */}
+      <div className="mb-5 flex gap-3">
+        <div className="relative flex-1">
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
+          <input
+            type="search"
+            placeholder="Rechercher par email, prénom, nom…"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="h-10 w-full rounded-xl border border-zinc-200 bg-white pl-9 pr-3.5 text-sm text-zinc-900 outline-none transition-all placeholder:text-zinc-400 hover:border-zinc-300 focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20"
+          />
+        </div>
         <select
           value={churnFilter}
           onChange={(e) => setChurnFilter(e.target.value)}
-          className="focus:ring-brand-500 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2"
+          className="h-10 rounded-xl border border-zinc-200 bg-white px-3 text-sm text-zinc-700 outline-none transition-all hover:border-zinc-300 focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20"
         >
           <option value="">Tous les statuts</option>
-          <option value="LOW">Actifs</option>
+          <option value="LOW">Actifs seulement</option>
           <option value="MEDIUM">À risque</option>
           <option value="HIGH">Inactifs</option>
         </select>
       </div>
 
-      <div className="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-gray-200">
+      {/* Table */}
+      <div className="panel overflow-hidden">
         {loading && customers.length === 0 ? (
-          <div className="flex h-32 items-center justify-center">
-            <div className="border-brand-600 h-6 w-6 animate-spin rounded-full border-2 border-t-transparent" />
+          <div className="flex h-40 items-center justify-center">
+            <Spinner size="md" />
           </div>
         ) : customers.length === 0 ? (
-          <div className="flex h-32 items-center justify-center text-sm text-gray-500">
-            Aucun client trouvé
+          <div className="flex h-40 flex-col items-center justify-center gap-2">
+            <Users className="h-8 w-8 text-zinc-300" />
+            <p className="text-sm text-zinc-500">Aucun client trouvé</p>
           </div>
         ) : (
           <table className="w-full text-left text-sm">
-            <thead className="border-b border-gray-200 bg-gray-50">
+            <thead className="border-b border-zinc-100 bg-zinc-50/50">
               <tr>
-                <th className="px-4 py-3 font-medium text-gray-600">Client</th>
-                <th className="px-4 py-3 font-medium text-gray-600">Points</th>
-                <th className="px-4 py-3 font-medium text-gray-600">Dernière visite</th>
-                <th className="px-4 py-3 font-medium text-gray-600">Statut</th>
-                <th className="px-4 py-3" />
+                <th className="px-5 py-3.5 text-xs font-semibold uppercase tracking-wider text-zinc-500">
+                  Client
+                </th>
+                <th className="px-5 py-3.5 text-xs font-semibold uppercase tracking-wider text-zinc-500">
+                  Points
+                </th>
+                <th className="hidden px-5 py-3.5 text-xs font-semibold uppercase tracking-wider text-zinc-500 sm:table-cell">
+                  Dernière visite
+                </th>
+                <th className="px-5 py-3.5 text-xs font-semibold uppercase tracking-wider text-zinc-500">
+                  Statut
+                </th>
+                <th className="px-5 py-3.5" />
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-zinc-100">
               {customers.map((c) => {
-                const badge = c.churn_score
-                  ? CHURN_BADGE[c.churn_score as keyof typeof CHURN_BADGE]
+                const churn = c.churn_score
+                  ? CHURN_VARIANT[c.churn_score as keyof typeof CHURN_VARIANT]
                   : null
                 const name = [c.first_name, c.last_name].filter(Boolean).join(' ') || '—'
+                const initials = name !== '—' ? name : c.email.split('@')[0]
+
                 return (
-                  <tr key={c.id} className="hover:bg-gray-50">
-                    <td className="px-4 py-3">
-                      <div className="font-medium text-gray-900">{name}</div>
-                      <div className="text-gray-500">{c.email}</div>
+                  <tr key={c.id} className="group transition-colors hover:bg-zinc-50/70">
+                    <td className="px-5 py-3.5">
+                      <div className="flex items-center gap-3">
+                        <Avatar fallback={initials} size="sm" />
+                        <div>
+                          <p className="font-medium text-zinc-900">{name}</p>
+                          <p className="text-xs text-zinc-400">{c.email}</p>
+                        </div>
+                      </div>
                     </td>
-                    <td className="px-4 py-3 font-semibold text-gray-900">
-                      {c.total_points.toLocaleString('fr-FR')} pts
+                    <td className="px-5 py-3.5">
+                      <span className="tabular font-semibold text-zinc-900">
+                        {c.total_points.toLocaleString('fr-FR')}
+                      </span>
+                      <span className="ml-1 text-xs text-zinc-400">pts</span>
                     </td>
-                    <td className="px-4 py-3 text-gray-500">{formatDate(c.last_visit_at)}</td>
-                    <td className="px-4 py-3">
-                      {badge ? (
-                        <span
-                          className={`rounded-full px-2 py-0.5 text-xs font-medium ${badge.className}`}
-                        >
-                          {badge.label}
-                        </span>
+                    <td className="hidden px-5 py-3.5 text-zinc-500 sm:table-cell">
+                      {formatDate(c.last_visit_at)}
+                    </td>
+                    <td className="px-5 py-3.5">
+                      {churn ? (
+                        <Badge variant={churn.variant} dot size="md">
+                          {churn.label}
+                        </Badge>
                       ) : (
-                        <span className="text-gray-400">—</span>
+                        <span className="text-zinc-300">—</span>
                       )}
                     </td>
-                    <td className="px-4 py-3 text-right">
+                    <td className="px-5 py-3.5 text-right">
                       <Link
                         href={`/dashboard/customers/${c.id}` as Route}
-                        className="text-brand-600 hover:text-brand-700 hover:underline"
+                        className="inline-flex items-center gap-1 text-xs font-semibold text-violet-600 opacity-0 transition-colors hover:text-violet-700 group-hover:opacity-100"
                       >
                         Voir
+                        <ChevronRight className="h-3.5 w-3.5" />
                       </Link>
                     </td>
                   </tr>
@@ -173,13 +194,14 @@ export default function CustomersPage() {
 
       {meta.next_cursor && (
         <div className="mt-4 flex justify-center">
-          <button
-            onClick={loadMore}
-            disabled={loading}
-            className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-60"
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => fetchCustomers(meta.next_cursor, true)}
+            loading={loading}
           >
-            {loading ? 'Chargement...' : 'Charger plus'}
-          </button>
+            Charger plus
+          </Button>
         </div>
       )}
     </div>
