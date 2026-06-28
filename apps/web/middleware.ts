@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 
-const PUBLIC_PATHS = ['/login', '/register', '/forgot-password', '/reset-password']
+const PUBLIC_PATHS = ['/', '/login', '/register', '/forgot-password', '/reset-password']
 
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname
@@ -53,7 +53,7 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL('/login', request.url))
     }
 
-    if (user && isPublicPath) {
+    if (user && isPublicPath && pathname !== '/') {
       return NextResponse.redirect(new URL('/dashboard', request.url))
     }
   } catch {
