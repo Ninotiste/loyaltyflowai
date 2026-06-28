@@ -16,23 +16,76 @@ LoyaltyFlowAI donne aux restaurateurs les outils d'intelligence artificielle pou
 
 ## Documentation
 
-| Document | Description |
-|---|---|
-| [MASTER_PLAN.md](./MASTER_PLAN.md) | Source de vérité — vision, stratégie, stack, roadmap |
-| [CHANGELOG.md](./CHANGELOG.md) | Journal des versions |
-| [CONTRIBUTING.md](./CONTRIBUTING.md) | Conventions de contribution et processus PR |
-| [DEVELOPMENT.md](./DEVELOPMENT.md) | Guide de développement local |
-| [DEPLOYMENT.md](./DEPLOYMENT.md) | Guide de déploiement Vercel |
-| [docs/product/PRD.md](./docs/product/PRD.md) | Product Requirements Document |
-| [docs/technical/ARCHITECTURE.md](./docs/technical/ARCHITECTURE.md) | Décisions d'architecture (ADRs) |
-| [docs/technical/DATABASE.md](./docs/technical/DATABASE.md) | Schéma de base de données |
-| [docs/technical/API.md](./docs/technical/API.md) | Documentation API |
-| [docs/technical/SECURITY.md](./docs/technical/SECURITY.md) | Politiques de sécurité |
-| [docs/technical/ENVIRONMENTS.md](./docs/technical/ENVIRONMENTS.md) | Environnements dev / staging / prod |
-| [docs/business/PRICING.md](./docs/business/PRICING.md) | Stratégie de pricing |
-| [docs/business/GTM.md](./docs/business/GTM.md) | Go-to-market strategy |
-| [docs/business/METRICS.md](./docs/business/METRICS.md) | Définition des métriques et KPIs |
-| [docs/operations/RUNBOOK.md](./docs/operations/RUNBOOK.md) | Procédures opérationnelles |
+### Racine
+
+| Document                             | Description                                               |
+| ------------------------------------ | --------------------------------------------------------- |
+| [MASTER_PLAN.md](./MASTER_PLAN.md)   | Source de vérité — vision, stratégie, stack, roadmap      |
+| [DECISIONS.md](./DECISIONS.md)       | Registre des décisions ouvertes (product, tech, business) |
+| [CHANGELOG.md](./CHANGELOG.md)       | Journal des versions                                      |
+| [CONTRIBUTING.md](./CONTRIBUTING.md) | Conventions de contribution et processus PR               |
+| [DEVELOPMENT.md](./DEVELOPMENT.md)   | Guide de développement local                              |
+| [DEPLOYMENT.md](./DEPLOYMENT.md)     | Guide de déploiement Vercel                               |
+
+### Product
+
+| Document                                                         | Description                                                               |
+| ---------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| [docs/product/PRODUCT_BIBLE.md](./docs/product/PRODUCT_BIBLE.md) | **Source de vérité produit** — Vision, JTBD, Personas, Roadmap, BMC, SWOT |
+| [docs/product/PRD.md](./docs/product/PRD.md)                     | Product Requirements Document (specs fonctionnelles)                      |
+| [docs/product/user-stories/](./docs/product/user-stories/)       | User Stories US-001 à US-011                                              |
+
+### Business
+
+| Document                                                                         | Description                                                |
+| -------------------------------------------------------------------------------- | ---------------------------------------------------------- |
+| [docs/business/COMPETITIVE_ANALYSIS.md](./docs/business/COMPETITIVE_ANALYSIS.md) | Analyse de 10 concurrents (FidMe, Loopy, Lightspeed, etc.) |
+| [docs/business/PRICING.md](./docs/business/PRICING.md)                           | Stratégie de pricing (49/149/299 €)                        |
+| [docs/business/GTM.md](./docs/business/GTM.md)                                   | Go-to-market strategy                                      |
+| [docs/business/METRICS.md](./docs/business/METRICS.md)                           | Métriques et KPIs (NSM, OKRs)                              |
+
+### Customer
+
+| Document                                                                     | Description                                                |
+| ---------------------------------------------------------------------------- | ---------------------------------------------------------- |
+| [docs/customer/CUSTOMER_LIFECYCLE.md](./docs/customer/CUSTOMER_LIFECYCLE.md) | Cycle de vie client — 9 étapes, métriques, séquences email |
+
+### UX
+
+| Document                                   | Description                                                     |
+| ------------------------------------------ | --------------------------------------------------------------- |
+| [docs/ux/SCREENS.md](./docs/ux/SCREENS.md) | Tous les écrans, flows, wireframes textuels, micro-interactions |
+
+### IA
+
+| Document                                               | Description                                                             |
+| ------------------------------------------------------ | ----------------------------------------------------------------------- |
+| [docs/ai/LOYALTY_BRAIN.md](./docs/ai/LOYALTY_BRAIN.md) | Architecture IA complète — churn scoring, segmentation, recommandations |
+
+### Technique
+
+| Document                                                           | Description                                                         |
+| ------------------------------------------------------------------ | ------------------------------------------------------------------- |
+| [docs/technical/DISCOVERY.md](./docs/technical/DISCOVERY.md)       | Discovery technique complète — modules, flux, sécurité, scalabilité |
+| [docs/technical/ARCHITECTURE.md](./docs/technical/ARCHITECTURE.md) | Décisions d'architecture (ADRs)                                     |
+| [docs/technical/DATABASE.md](./docs/technical/DATABASE.md)         | Schéma de base de données                                           |
+| [docs/technical/API.md](./docs/technical/API.md)                   | Documentation API                                                   |
+| [docs/technical/SECURITY.md](./docs/technical/SECURITY.md)         | Politiques de sécurité                                              |
+| [docs/technical/ENVIRONMENTS.md](./docs/technical/ENVIRONMENTS.md) | Environnements dev / staging / prod                                 |
+
+### Audit & Review
+
+| Document                                                 | Description                                                      |
+| -------------------------------------------------------- | ---------------------------------------------------------------- |
+| [docs/AUDIT.md](./docs/AUDIT.md)                         | Audit complet de la documentation (score 6.2/10 → objectif 9/10) |
+| [docs/INVESTMENT_REVIEW.md](./docs/INVESTMENT_REVIEW.md) | Revue multi-perspectives (VC, CTO, PM, restaurateur, dev)        |
+| [docs/TODO.md](./docs/TODO.md)                           | Liste d'actions prioritisées P0 → P3                             |
+
+### Opérations
+
+| Document                                                       | Description                           |
+| -------------------------------------------------------------- | ------------------------------------- |
+| [docs/operations/RUNBOOK.md](./docs/operations/RUNBOOK.md)     | Procédures opérationnelles            |
 | [docs/operations/INCIDENTS.md](./docs/operations/INCIDENTS.md) | Gestion des incidents et post-mortems |
 
 ---
@@ -58,17 +111,17 @@ loyaltyflowai/
 
 ## Stack
 
-| Couche | Technologie |
-|---|---|
-| Framework | Next.js 14+ (App Router, full-stack) |
-| Language | TypeScript (strict mode) |
-| Base de données | Supabase PostgreSQL (EU Frankfurt) |
-| ORM | Prisma |
-| Cache | Upstash Redis (EU Ireland) |
-| Hosting | Vercel (EU) |
-| IA | Claude API (Anthropic) |
-| UI | shadcn/ui + Tailwind CSS |
-| Monorepo | Turborepo + pnpm workspaces |
+| Couche          | Technologie                          |
+| --------------- | ------------------------------------ |
+| Framework       | Next.js 14+ (App Router, full-stack) |
+| Language        | TypeScript (strict mode)             |
+| Base de données | Supabase PostgreSQL (EU Frankfurt)   |
+| ORM             | Prisma                               |
+| Cache           | Upstash Redis (EU Ireland)           |
+| Hosting         | Vercel (EU)                          |
+| IA              | Claude API (Anthropic)               |
+| UI              | shadcn/ui + Tailwind CSS             |
+| Monorepo        | Turborepo + pnpm workspaces          |
 
 ---
 
@@ -111,16 +164,16 @@ pnpm format       # Formatage Prettier
 
 ## Roadmap
 
-| Phase | Période | Objectif |
-|---|---|---|
-| **Phase 0** (en cours) | Q3 2026 | Fondation — infra, auth, design system, design partners |
-| Phase 1 | Q4 2026 | MVP — 10 clients payants |
-| Phase 2 | Q1 2027 | Traction — intégrations, 100 clients |
-| Phase 3 | Q2 2027 | Scale — API publique, mobile, 500 clients |
-| Phase 4 | Q3 2027+ | Platform — white-label, marketplace |
+| Phase                  | Période  | Objectif                                                |
+| ---------------------- | -------- | ------------------------------------------------------- |
+| **Phase 0** (en cours) | Q3 2026  | Fondation — infra, auth, design system, design partners |
+| Phase 1                | Q4 2026  | MVP — 10 clients payants                                |
+| Phase 2                | Q1 2027  | Traction — intégrations, 100 clients                    |
+| Phase 3                | Q2 2027  | Scale — API publique, mobile, 500 clients               |
+| Phase 4                | Q3 2027+ | Platform — white-label, marketplace                     |
 
 → [Roadmap détaillée](./MASTER_PLAN.md#24-roadmap-générale)
 
 ---
 
-*LoyaltyFlowAI — Confidentiel — © 2026*
+_LoyaltyFlowAI — Confidentiel — © 2026_

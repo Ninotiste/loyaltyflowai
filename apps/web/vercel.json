@@ -1,7 +1,7 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "installCommand": "cd ../.. && pnpm install --frozen-lockfile",
-  "buildCommand": "cd ../.. && pnpm turbo run build --filter=@loyaltyflowai/web",
+  "buildCommand": "cd ../.. && SKIP_ENV_VALIDATION=1 pnpm turbo run build --filter=@loyaltyflowai/web",
   "outputDirectory": ".next",
   "framework": "nextjs",
   "regions": ["cdg1"],

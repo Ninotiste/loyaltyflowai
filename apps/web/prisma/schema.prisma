@@ -11,16 +11,21 @@ datasource db {
 // ─── Organisation (Tenant) ────────────────────────────────────────────────────
 
 model Organization {
-  id         String   @id @default(uuid())
-  name       String
-  slug       String   @unique
-  logo_url   String?
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
+  id                     String    @id @default(uuid())
+  name                   String
+  slug                   String    @unique
+  logo_url               String?
+  plan                   String    @default("starter")
+  plan_status            String    @default("active")
+  stripe_customer_id     String?
+  stripe_subscription_id String?
+  created_at             DateTime  @default(now())
+  updated_at             DateTime  @updatedAt
 
   team_members    TeamMember[]
   loyalty_program LoyaltyProgram?
   customers       Customer[]
+  invitations     Invitation[]
 
   @@map("organizations")
 }
@@ -31,7 +36,7 @@ model TeamMember {
   id              String   @id @default(uuid())
   organization_id String
   user_id         String   @unique
-  role            TeamRole @default(MEMBER)
+  role            TeamRole @default(EMPLOYEE)
   email           String
   created_at      DateTime @default(now())
   updated_at      DateTime @updatedAt
@@ -42,9 +47,28 @@ model TeamMember {
   @@map("team_members")
 }
 
+model Invitation {
+  id              String    @id @default(uuid())
+  organization_id String
+  email           String
+  role            TeamRole
+  token           String    @unique
+  expires_at      DateTime
+  accepted_at     DateTime?
+  created_at      DateTime  @default(now())
+
+  organization Organization @relation(fields: [organization_id], references: [id], onDelete: Cascade)
+
+  @@index([token])
+  @@index([organization_id])
+  @@map("invitations")
+}
+
 enum TeamRole {
   ADMIN
-  MEMBER
+  MANAGER
+  EMPLOYEE
+  MEMBER // kept for backwards compatibility
 }
 
 // ─── Programme de fidélité ────────────────────────────────────────────────────
@@ -57,6 +81,8 @@ model LoyaltyProgram {
   public_key                String        @unique
   inactivity_threshold_days Int           @default(30)
   primary_color             String?       @default("#0284c7")
+  welcome_message           String?
+  button_text               String?       @default("Mes points 🎁")
   created_at                DateTime      @default(now())
   updated_at                DateTime      @updatedAt
 
@@ -80,6 +106,7 @@ model EarningRule {
   type               EarningRuleType
   points_per_unit    Int
   unit_description   String?
+  minimum_amount     Int?
   is_active          Boolean         @default(true)
   created_at         DateTime        @default(now())
   updated_at         DateTime        @updatedAt
@@ -125,6 +152,8 @@ model Customer {
   total_points    Int       @default(0)
   last_visit_at   DateTime?
   deleted_at      DateTime?
+  anonymized_at   DateTime?
+  consent_at      DateTime?
   created_at      DateTime  @default(now())
   updated_at      DateTime  @updatedAt
 
@@ -147,6 +176,7 @@ model PointTransaction {
   amount      Int
   type        PointTransactionType
   reason      String?
+  performed_by String?             // TeamMember.user_id who performed the action
   created_at  DateTime             @default(now())
 
   customer Customer @relation(fields: [customer_id], references: [id], onDelete: Cascade)
