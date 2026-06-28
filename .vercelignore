@@ -1,0 +1,12 @@
+.turbo
+node_modules
+.pnpm-store
+coverage
+*.log
+.env
+.env.local
+.env.*.local
+.env.production
+apps/web/.next
+apps/web/tsconfig.tsbuildinfo
+.playwright-mcp
