@@ -1,3 +1,4 @@
+
 import { getDaysSinceLastVisit, calculateChurnLevel } from '../churn'
 
 describe('getDaysSinceLastVisit', () => {
@@ -13,6 +14,11 @@ describe('getDaysSinceLastVisit', () => {
   it('returns correct days for past dates', () => {
     const twoDaysAgo = new Date(Date.now() - 2 * 24 * 60 * 60 * 1000)
     expect(getDaysSinceLastVisit(twoDaysAgo)).toBe(2)
+  })
+
+  it('returns a negative number for a future visit date', () => {
+    const tomorrow = new Date(Date.now() + 24 * 60 * 60 * 1000)
+    expect(getDaysSinceLastVisit(tomorrow)).toBe(-1)
   })
 })
 
