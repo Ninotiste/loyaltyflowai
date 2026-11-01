@@ -3,7 +3,7 @@
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
-import { ArrowRight, Star, TrendingDown, Users, Zap } from 'lucide-react'
+import { ArrowRight, TrendingDown, Users, Zap } from 'lucide-react'
 import { useEffect, useState, useRef } from 'react'
 
 const HeroScene = dynamic(
@@ -171,35 +171,15 @@ export function Hero() {
               </Link>
             </motion.div>
 
-            {/* Social proof */}
-            <motion.div
-              className="mt-12 flex items-center gap-5"
+            {/* Product status — avoid presenting demo metrics as customer results */}
+            <motion.p
+              className="mt-12 text-xs font-medium tracking-wide text-white/40"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.6, delay: 0.6 }}
             >
-              <div className="flex -space-x-2.5">
-                {['SB', 'ML', 'JP', 'AT', 'NR'].map((initials, i) => (
-                  <div
-                    key={initials}
-                    className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-[#05050A] bg-gradient-to-br from-violet-600 to-violet-800 text-[10px] font-bold text-white"
-                    style={{ zIndex: 5 - i }}
-                  >
-                    {initials}
-                  </div>
-                ))}
-              </div>
-              <div className="flex flex-col">
-                <div className="flex items-center gap-1">
-                  {Array.from({ length: 5 }).map((_, i) => (
-                    <Star key={i} className="h-3 w-3 fill-amber-400 text-amber-400" />
-                  ))}
-                </div>
-                <span className="text-xs text-white/40">
-                  <strong className="text-white/70">3 200+</strong> restaurants en France
-                </span>
-              </div>
-            </motion.div>
+              Aperçu produit · Les chiffres présentés sont des données de démonstration
+            </motion.p>
           </div>
 
           {/* Right — 3D Scene */}
