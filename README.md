@@ -178,4 +178,17 @@ pnpm format       # Formatage Prettier
 
 ---
 
+## Contribuer
+
+LoyaltyFlowAI est ouvert aux contributions. Les contributions de documentation, tests, corrections et nouvelles fonctionnalités sont les bienvenues.
+
+- Commencez par lire [CONTRIBUTING.md](./CONTRIBUTING.md) et [DEVELOPMENT.md](./DEVELOPMENT.md).
+- Consultez les [issues ouvertes](https://github.com/Ninotiste/loyaltyflowai/issues) pour trouver un sujet.
+- Vous pouvez aussi ouvrir une issue pour discuter d'une idée avant de coder.
+- Les signalements de sécurité doivent suivre la procédure privée décrite dans [SECURITY.md](./SECURITY.md).
+
+_Les issues marquées « good first issue » sont destinées aux personnes qui découvrent le dépôt._
+
+---
+
 _LoyaltyFlowAI — Open source sous licence MIT — © 2026_
