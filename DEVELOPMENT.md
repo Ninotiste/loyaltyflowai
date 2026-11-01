@@ -10,21 +10,24 @@
 | pnpm | 9.14+ | `npm install -g pnpm` |
 | Git | 2.x | système |
 
-**Comptes requis :**
-- [Supabase](https://supabase.com) — projet de développement (gratuit)
-- [Upstash](https://upstash.com) — base Redis de développement (gratuit)
-- [Anthropic](https://console.anthropic.com) — clé API Claude (pay-as-you-go)
+**Services externes utilisés par certaines fonctionnalités :**
+- [Supabase](https://supabase.com) — base de données de développement
+- [Upstash](https://upstash.com) — Redis de développement
+- [Anthropic](https://console.anthropic.com) — API Claude
+- [Resend](https://resend.com) — envoi d'e-mails, si cette fonctionnalité est activée
+
+Les comptes et clés nécessaires dépendent des fonctionnalités que vous souhaitez exécuter localement.
 
 ---
 
 ## Installation
 
 ```bash
-# 1. Cloner le repo
-git clone https://github.com/[org]/loyaltyflowai
+# 1. Cloner le dépôt
+git clone https://github.com/Ninotiste/loyaltyflowai.git
 cd loyaltyflowai
 
-# 2. Installer toutes les dépendances (workspaces inclus)
+# 2. Installer les dépendances
 pnpm install
 
 # 3. Générer le client Prisma
@@ -35,125 +38,121 @@ pnpm --filter @loyaltyflowai/web exec prisma generate
 
 ## Configuration des variables d'environnement
 
+Si le fichier `.env.example` existe à la racine :
+
 ```bash
 cp .env.example apps/web/.env.local
 ```
 
-Ouvrir `apps/web/.env.local` et remplir chaque variable — voir [ENVIRONMENTS.md](./docs/technical/ENVIRONMENTS.md) pour la liste complète et les instructions de récupération des valeurs.
+Complétez uniquement les variables nécessaires à votre environnement local. Consultez [ENVIRONMENTS.md](./docs/technical/ENVIRONMENTS.md) pour les détails.
 
-**Variables minimales pour démarrer :**
-```bash
-NEXT_PUBLIC_SUPABASE_URL=https://xxxx.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJ...
-SUPABASE_SERVICE_ROLE_KEY=eyJ...
-DATABASE_URL=postgresql://postgres:password@db.xxxx.supabase.co:6543/postgres?pgbouncer=true
-DIRECT_URL=postgresql://postgres:password@db.xxxx.supabase.co:5432/postgres
-UPSTASH_REDIS_REST_URL=https://xxxx.upstash.io
-UPSTASH_REDIS_REST_TOKEN=xxxx
-ANTHROPIC_API_KEY=sk-ant-xxxx
-RESEND_API_KEY=re_xxxx
-CRON_SECRET=une-chaine-aleatoire-de-32-caracteres-minimum
-```
+**Sécurité :**
+- Ne partagez jamais vos clés API, mots de passe ou jetons.
+- Ne commitez pas `.env`, `.env.local` ou tout fichier contenant des secrets.
+- Utilisez des valeurs de test pour le développement lorsque c'est possible.
+- Les variables `NEXT_PUBLIC_*` sont exposées au navigateur : n'y placez aucun secret.
 
 ---
 
 ## Base de données
 
 ```bash
-# Appliquer toutes les migrations existantes
+# Appliquer les migrations existantes
 pnpm --filter @loyaltyflowai/web exec prisma migrate dev
 
 # Vérifier l'état des migrations
 pnpm --filter @loyaltyflowai/web exec prisma migrate status
 
-# Ouvrir Prisma Studio (interface visuelle)
+# Ouvrir Prisma Studio
 pnpm --filter @loyaltyflowai/web exec prisma studio
 
-# Créer une nouvelle migration (après modification du schéma)
+# Créer une migration après modification du schéma
 pnpm --filter @loyaltyflowai/web exec prisma migrate dev --name nom-de-la-migration
 ```
 
-> **Important :** `DATABASE_URL` pointe vers PgBouncer (port 6543, pooled) — pour les migrations, `DIRECT_URL` pointe vers PostgreSQL direct (port 5432). Les deux sont nécessaires.
+Vérifiez la configuration Prisma du projet avant d'exécuter des migrations. Utilisez la connexion directe prévue pour les migrations si le projet distingue une URL directe d'une URL poolée.
 
 ---
 
 ## Démarrage
 
 ```bash
-# Démarrer tous les packages en parallèle (web + worker)
+# Démarrer les applications et packages configurés
 pnpm dev
 
-# Démarrer uniquement l'app web
+# Démarrer uniquement l'application web
 pnpm --filter @loyaltyflowai/web dev
 
-# Démarrer uniquement le worker
+# Démarrer uniquement le worker, si son script dev est configuré
 pnpm --filter @loyaltyflowai/worker dev
 ```
 
-L'app web est disponible sur `http://localhost:3000`.
+L'application web est généralement disponible sur `http://localhost:3000`, selon la configuration locale.
 
 ---
 
 ## Commandes de qualité
 
 ```bash
-pnpm type-check    # TypeScript strict — doit être vert avant tout commit
-pnpm lint          # ESLint sur tous les packages
-pnpm test          # Tests unitaires (jest + ts-jest)
-pnpm format        # Formatage Prettier
-
-# Build de production local (nécessite les vraies env vars)
+pnpm type-check
+pnpm lint
+pnpm test
+pnpm format
 pnpm build
-
-# Build sans env vars (vérifie la compilation uniquement)
-SKIP_ENV_VALIDATION=1 pnpm build
 ```
+
+Certaines commandes peuvent nécessiter des variables d'environnement ou des services externes. Consultez les scripts définis dans les fichiers `package.json` des packages avant de les exécuter.
 
 ---
 
 ## Structure des packages
 
 ```
-packages/config/   → Importer serverEnv ou clientEnv (jamais process.env directement)
-packages/logger/   → createLogger('nom-module') pour tous les logs
-packages/types/    → Types TypeScript partagés (ChurnLevel, etc.)
-packages/ui/       → Composants shadcn/ui (ChurnBadge, etc.)
-packages/utils/    → Fonctions pures utilitaires (crypto, calculateChurn core)
+packages/config/   → Configuration et validation des variables d'environnement
+packages/logger/   → Logger partagé
+packages/types/    → Types TypeScript partagés
+packages/ui/       → Composants UI partagés
+packages/utils/    → Fonctions utilitaires partagées
 ```
 
 ---
 
-## Workflow quotidien
+## Workflow de contribution
+
+Le dépôt utilise `main` comme branche par défaut. Pour contribuer :
 
 ```bash
-git checkout develop
-git pull origin develop
-git checkout -b feat/ma-feature
+git switch main
+git pull origin main
+git switch -c docs/ma-contribution
 
-# ... développement ...
+# ... effectuer les changements ...
 
-pnpm type-check && pnpm lint && pnpm test
-git add -p
-git commit -m "feat(scope): description"
-git push origin feat/ma-feature
-# → Ouvrir PR vers develop
+pnpm type-check
+pnpm lint
+pnpm test
+git add .
+git commit -m "docs(scope): décrire le changement"
+git push -u origin docs/ma-contribution
 ```
+
+Ouvrez ensuite une Pull Request de votre branche vers `main`. Consultez [CONTRIBUTING.md](./CONTRIBUTING.md) pour les conventions détaillées.
 
 ---
 
 ## Résolution de problèmes courants
 
-**`Cannot find module '@loyaltyflowai/config'`**
-→ `pnpm install` puis `pnpm --filter @loyaltyflowai/web exec prisma generate`
+**Dépendances ou packages introuvables**
+→ Vérifiez la version de Node.js et de pnpm, puis relancez `pnpm install`.
 
-**Erreur de validation des env vars au démarrage**
-→ Vérifier que `apps/web/.env.local` contient toutes les variables requises
+**Erreur de validation des variables d'environnement**
+→ Vérifiez les variables requises par la fonctionnalité lancée et leur présence dans votre fichier local.
 
-**Prisma : `P1001 Can't reach database server`**
-→ Vérifier `DIRECT_URL` (pas `DATABASE_URL` pour les migrations) et les credentials Supabase
+**Prisma ne peut pas joindre la base de données**
+→ Vérifiez les URLs et identifiants de connexion, ainsi que l'accessibilité du projet Supabase.
 
-**`pnpm build` échoue sans env vars**
-→ Utiliser `SKIP_ENV_VALIDATION=1 pnpm build` pour les builds de vérification uniquement
+**Le build échoue sans variables d'environnement**
+→ Consultez la configuration du projet pour connaître les variables nécessaires. N'utilisez un mode de contournement de validation que s'il est explicitement prévu par le projet.
 
 ---
 
