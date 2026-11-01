@@ -5,6 +5,13 @@ updates:
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 5
+    # Keep automatic updates to compatible minor and patch releases.
+    # Major upgrades must be handled separately because they can require migrations.
+    allow:
+      - dependency-type: "all"
+        update-types:
+          - "version-update:semver-minor"
+          - "version-update:semver-patch"
     groups:
       production-and-development:
         patterns:
