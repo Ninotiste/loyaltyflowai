@@ -1,5 +1,7 @@
 # LoyaltyFlowAI
 
+[![CI](https://github.com/Ninotiste/loyaltyflowai/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Ninotiste/loyaltyflowai/actions/workflows/ci.yml)
+
 > Plateforme de fidélisation client intelligente pour la restauration indépendante.
 
 **Statut :** Phase 0 — Fondation | **Version :** 0.1.0-alpha | **Marché :** France
@@ -176,4 +178,4 @@ pnpm format       # Formatage Prettier
 
 ---
 
-_LoyaltyFlowAI — Confidentiel — © 2026_
+_LoyaltyFlowAI — Open source sous licence MIT — © 2026_
