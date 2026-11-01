@@ -1,0 +1,31 @@
+name: Proposer une amélioration
+description: Suggérer une évolution utile au projet
+title: "[Feature] "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Quel problème souhaitez-vous résoudre ?
+      description: Décrivez le besoin concret, idéalement du point de vue d'un restaurateur ou d'un client.
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: Solution proposée
+      description: Comment imaginez-vous cette amélioration ?
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives envisagées
+    validations:
+      required: false
+  - type: textarea
+    id: context
+    attributes:
+      label: Contexte complémentaire
+    validations:
+      required: false
