@@ -3,7 +3,7 @@
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
-import { ArrowRight, TrendingDown, Users, Zap } from 'lucide-react'
+import { ArrowRight, Star, TrendingDown, Users, Zap } from 'lucide-react'
 import { useEffect, useState, useRef } from 'react'
 
 const HeroScene = dynamic(
