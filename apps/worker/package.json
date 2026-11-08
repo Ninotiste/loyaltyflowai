@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@prisma/client": "^5.22.0",
-    "@upstash/redis": "^1.40.0",
+    "@upstash/redis": "^1.41.0",
     "@anthropic-ai/sdk": "^0.137.0",
     "@loyaltyflowai/config": "workspace:*",
     "@loyaltyflowai/logger": "workspace:*",
