@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@prisma/client": "^5.22.0",
-    "@upstash/redis": "^1.40.0",
+    "@upstash/redis": "^1.41.0",
     "@anthropic-ai/sdk": "^0.137.0",
     "@loyaltyflowai/config": "workspace:*",
     "@loyaltyflowai/logger": "workspace:*",
@@ -20,8 +20,8 @@
   },
   "devDependencies": {
     "@types/node": "^22.20.5",
-    "@typescript-eslint/eslint-plugin": "^8.72.1",
-    "@typescript-eslint/parser": "^8.72.1",
+    "@typescript-eslint/eslint-plugin": "^8.73.0",
+    "@typescript-eslint/parser": "^8.73.0",
     "eslint": "^8.57.1",
     "prisma": "^5.22.0",
     "tsx": "^4.23.15",
